@@ -1,0 +1,74 @@
+{
+    "article": [
+  
+      {
+        "topic": "Creating DEE Actions",
+        "content": "# Dynamic Execution Engine (DEE or DE²) actions are the most powerful mechanisms in what concerns to customization and extensibility within Critical Manufacturing MES. DEE Actions are blocks compiled C# code that are automatically executed in runtime (they can also be executed manually). To create a DEE, follow these steps: Access the DEE Actions page in the 'Administration' page group and press the New DEE Action button Enter a name for the DEE Action Enter a description for the DEE Action (optional) Enter a classification for the DEE Action (optional) Mark the DEE Action as enabled or disabled. A disabled DEE Action will not be executed neither by the 'Pre' or 'Post' transaction logic Add the DEE Action to as many DEE Action Groups as desired. The DEE Action, if enabled, will be executed automatically as part of the 'Pre' and 'Post' transaction logic Edit the test condition. It must return a boolean value: true means that the action will be executed, whereas false means that the action will not be executed Edit the DEE Action code Press Save. The code will be validated automatically. It can also be explicitly validated at any point by pressing the 'Validate' button. Access the DEE Actions page in the 'Administration' page group and press the New DEE Action button Enter a name for the DEE Action Enter a description for the DEE Action (optional) Enter a classification for the DEE Action (optional) Mark the DEE Action as enabled or disabled. A disabled DEE Action will not be executed neither by the 'Pre' or 'Post' transaction logic Add the DEE Action to as many DEE Action Groups as desired. The DEE Action, if enabled, will be executed automatically as part of the 'Pre' and 'Post' transaction logic Edit the test condition. It must return a boolean value: true means that the action will be executed, whereas false means that the action will not be executed Edit the DEE Action code Press Save. The code will be validated automatically. It can also be explicitly validated at any point by pressing the 'Validate' button.     ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#creating-dee-actions",
+          "https://developer.criticalmanufacturing.com/business/images/CreateDEE.gif",
+          "https://developer.criticalmanufacturing.com/business/images/DEEDialog.png"
+        ],
+        "code": ""
+      },
+      {
+        "topic": "Test Condition",
+        "content": "# In all DEE Actions, a test condition must be specified. This condition must be written in C# and the return value (true/false) will decide whether or not the action will be executed. Info The return value must be a Boolean Info If no executing condition is applicable then return true to always execute the action ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#test-condition"
+        ],
+        "code": "// This action will execute if it's not yet 10 o'clock\n\nint actualHour = System.DateTime.UtcNow.Hour;\n\nif (actualHour < 10)\n{\n return true;\n}\nelse\n{\n return false;\n}"
+      },
+      {
+        "topic": "Action Code",
+        "content": "# An example of how a DEE action code looks like is shown below   The first part of the code (red box) is a specific syntax to reference the system or external assemblies. The second part (blue box) is the C# code which will be compiled and executed at runtime. The UseReference directive takes two arguments of type string. The first argument is the name of the assembly to include as reference (equivalent to Add Reference in Visual Studio) and the second argument is the namespace within the assembly to be used (equivalent to the using keyword in C#). ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#action-code",
+          "https://developer.criticalmanufacturing.com/business/images/DEEActionCode.png"
+        ],
+        "code": ""
+      },
+      {
+        "topic": "Accessing the Service Provider",
+        "content": "# When executing any DEE action, the Input object (of type Dictionary) will always have an entry in the test condition and in the action code with a 'ServiceProvider' key that holds the current service provider (of type IServiceProvider). This allows access to the dependency injection container, as shown in the following code sample below: ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#accessing-the-service-provider"
+        ],
+        "code": "UseReference(\"Cmf.Foundation.BusinessObjects.dll\", \"Cmf.Foundation.BusinessObjects\");\nUseReference(\"Cmf.Foundation.BusinessOrchestration.dll\", \"\");\nUseReference(\"\", \"Cmf.Foundation.Common.Exceptions\");\nUseReference(\"\", \"Cmf.Foundation.Common\");\nUseReference(\"\", \"Cmf.Foundation.BusinessObjects.Abstractions\");\nUseReference(\"Microsoft.Extensions.DependencyInjection.Abstractions.dll\", \"Microsoft.Extensions.DependencyInjection\");\nUseReference(\"%MicrosoftNetPath%\\\\System.ComponentModel.dll\", \"System\");\nUseReference(\"Cmf.Foundation.Security.dll\", \"Cmf.Foundation.Security.Abstractions\");\n\nDictionary<string, object> output = new Dictionary<string, object>();\n\nIUser user = ((IServiceProvider)Input[\"ServiceProvider\"]).GetService<IUser>();\nuser.Load(\"ExampleUser\");\noutput[\"Result\"] = user.UserName;\n\nreturn output;"
+      },
+      {
+        "topic": "Automatic Execution",
+        "content": "# DEE actions are executed automatically by the system within the context of a service or operation as a 'Pre' or 'Post' transaction logic. To correctly configure an DEE Action to be executed in a 'Pre' or 'Post' transaction logic, it must be associated with at least one Action Group. The Action Group must follow the naming convention Namespace.Operation.Pre/Post Example: Rule.RuleOrchestration.CreateRule.Pre   Info In case multiple DEE Actions exist for the same Action Group, they will be executed in a cascading sequence according to their order (lowest to highest). Be careful of any possible side-effects caused by each executed DEE Action Info When multiple versions of an DEE Action exist, the system will execute only the effective action or (if no effective action is established) the action with the highest version ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#automatic-execution",
+          "https://developer.criticalmanufacturing.com/business/images/DEENamespace.png"
+        ],
+        "code": "Rule.RuleOrchestration.CreateRule.Pre"
+      },
+      {
+        "topic": "Manual Execution",
+        "content": "# DEE Actions can also be explicitly executed within the orchestration code or even from another DEE Actions, as shown in the following code sample: ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#manual-execution"
+        ],
+        "code": "var serviceProvider = (IServiceProvider)Input[\"ServiceProvider\"];\nCmf.Foundation.Common.Abstractions.IAction deeRule = serviceProvider.GetService<Cmf.Foundation.Common.Abstractions.IAction>();\ndeeRule.Load(\"CustomDEEAction\");\n\nList<KeyValuePair<string, object>> parameters = new List<KeyValuePair<string, object>>();\n\nif (this.Material != null)\n{\n parameters.Add(new KeyValuePair<string, object>(Cmf.Navigo.Common.Constants.Material, this.Material));\n}\n\nif (this.Resource != null)\n{\n parameters.Add(new KeyValuePair<string, object>(Cmf.Navigo.Common.Constants.Resource, this.Resource));\n}\n\nif (this.Product != null)\n{\n parameters.Add(new KeyValuePair<string, object>(Cmf.Navigo.Common.Constants.Product, this.Product));\n}\n\nif (this.Step != null)\n{\n parameters.Add(new KeyValuePair<string, object>(Cmf.Navigo.Common.Constants.Step, this.Step));\n}\n\nif (this.Facility != null)\n{\n parameters.Add(new KeyValuePair<string, object>(Cmf.Navigo.Common.Constants.Facility, this.Facility));\n}\n\nif (!string.IsNullOrEmpty(this.MaterialOperation))\n{\n parameters.Add(new KeyValuePair<string, object>(\"MaterialOperation\", this.MaterialOperation));\n}\n\nif (!string.IsNullOrEmpty(this.ResourceTransition))\n{\n parameters.Add(new KeyValuePair<string, object>(\"ResourceTransition\", this.ResourceTransition));\n}\n\n// execute DEE Action explicitly\nDictionary<string, object> result = deeRule.ExecuteAction(parameters.ToArray());\nif (!result.ContainsKey(\"Result\"))\n{\n throw new MissingOutputParameterCmfException(\n  \"DeeAction\",\n  param.ParameterCalculationFunction,\n  \"Result\");\n}"
+      },
+      {
+        "topic": "CSharp Template",
+        "content": "# This simple snippet in csharp can be used as template for a DEE Action: ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#csharp-template"
+        ],
+        "code": "csharpusing Cmf.Foundation.BusinessObjects;\nusing Cmf.Navigo.BusinessObjects;\nusing System;\nusing System.Collections.Generic;\nusing System.Data;\nusing System.Linq;\n\nnamespace Cmf.Custom.Core.Actions.MaterialActions\n{\n    public class CustomDEEAction : DeeDevBase\n    {\n        /// <summary>\n        /// Dee's the test condition.\n        /// </summary>\n        /// <param name=\"Input\">The input.</param>\n        /// <returns>\n        /// Return true if is to execute action.\n        /// </returns>\n        public override bool DeeTestCondition(Dictionary<string, object> Input)\n        {\n            //---Start DEE Condition Code---\n\n            /// <summary>\n            /// Summary Text\n            /// Description of DEE Action\n            /// Action Groups:  -\n            ///                 \n            /// </summary>\n            /// <param name=\"Input\">The input.</param>\n            /// <returns>\n            /// Return true if is to execute action.\n            /// </returns>\n\n            return true;\n\n            //---End DEE Condition Code---\n        }\n\n        /// <summary>\n        /// Dee's the action code.\n        /// </summary>\n        /// <param name=\"Input\">The input.</param>\n        /// <returns>\n        /// Return the Input for the next Action.\n        /// </returns>\n        public override Dictionary<string, object> DeeActionCode(Dictionary<string, object> Input)\n        {\n            //---Start DEE Code---\n            UseReference(\"Cmf.Navigo.BusinessObjects.dll\",\"Cmf.Navigo.BusinessObjects\");\n            UseReference(\"Cmf.Foundation.BusinessObjects.dll\",\"Cmf.Foundation.BusinessObjects\");\n\n            Dictionary<String, Object> Output = new Dictionary<string, object>();\n\n            IMaterial material = null;\n\n            if (Input.ContainsKey(\"Material\"))\n            {\n              material = (IMaterial)Input[\"Material\"];\n            }\n            else if (Input.ContainsKey(\"RecipeInstance\"))\n            {\n              material = ((IRecipeInstance)Input[\"RecipeInstance\"]).Material;\n            }\n            else if (Input.ContainsKey(\"DataCollectionInstance\"))\n            {\n              material = ((IDataCollectionInstance)Input[\"DataCollectionInstance\"]).Material;\n            }\n\n            if (material != null)\n            {\n              DateTime now = DateTime.Now;\n              TimeSpan processingTime = now.Subtract(material.TrackInDate ?? now);\n\n              Output.Add(\"Result\", processingTime);\n            }\n            else\n            {\n              throw new ArgumentNullCmfException(\"Material\");\n            }\n\n            //---End DEE Code---\n\n            return Output;\n        }\n    }\n}"
+      },
+      {
+        "topic": "Object creation and editing sequence",
+        "content": "# Starting on version 9.0.0, to create an entity, revision or version and save the properties associated to each one of those levels, always save before creating and follow the diagram below: As an example for object creation in DEE contexts, make sure that the properties for the object are saved before the object itself is created. These changes will be displayed in the History section of the object. For more information, please consult the section in the User Guide regarding DEE Actions ⧉. DEE Actions ⧉ ",
+        "links": [
+          "https://developer.criticalmanufacturing.com/business/createdeeactions/#object-creation-and-editing-sequence",
+          "http://help.criticalmanufacturing.com/userguide/administration/dee_actions/"
+        ],
+        "code": "var serviceProvider = (IServiceProvider)Input[\"ServiceProvider\"];\nIProduct prod = serviceProvider.GetService<IProduct>();\n\n// save the properties associated to the revision of an entity before creating a version\n\nprod.Save();\n\nprod.CreateVersion();\nprod.CreateRevision();\nprod.CreateEntity();"
+      }
+    ]
+  }

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM Assistant - Official Chat</title>
+    <link rel="icon" href="Images/CMLOG.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f4f7fb;
+        }
+
+        #header {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px; /* Space between logo and title */
+        }
+
+        #header img {
+            height: 100px; /* Adjust based on your logo's aspect ratio */
+            width: auto;
+        }
+
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            margin: 0 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        #chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f0f4f8;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 20px;
+            max-width: 80%;
+            word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .message.user {
+            background-color: #d1eaff;
+            align-self: flex-end;
+            text-align: right;
+            flex-direction: row-reverse; /* Position icon on the right */
+            margin-left: auto; /* Align message to the right */
+        }
+
+        .message.ai {
+            background-color: #e0e7ff;
+            align-self: flex-start;
+            text-align: left;
+            flex-direction: row; /* Position icon on the left */
+        }
+
+        .icon {
+            font-size: 28px;
+            color: #007bff;
+            margin: 0 10px;
+        }
+
+        .message-content {
+            font-size: 15px;
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        /* Code block styling */
+        pre {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #d63384;
+        }
+
+        /* Ordered list styling */
+        .message-content ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin-bottom: 5px;
+        }
+
+        #input-container {
+            display: flex;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            border-top: 1px solid #ccc;
+            flex-shrink: 0;
+        }
+
+        #question {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #c2d1e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        #send-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        #send-button:hover {
+            background-color: #0056b3;
+        }
+
+        #footer {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            border-top: 1px solid #0056b3;
+            flex-shrink: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #header {
+                font-size: 20px;
+                padding: 10px;
+            }
+
+            #header img {
+                height: 80px;
+            }
+
+            #chat-container {
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            #chat-box {
+                padding: 15px;
+            }
+
+            .message {
+                font-size: 14px;
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            .icon {
+                font-size: 22px;
+            }
+
+            #input-container {
+                padding: 10px;
+            }
+
+            #question {
+                font-size: 14px;
+            }
+
+            #send-button {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #header {
+                font-size: 18px;
+                padding: 8px;
+            }
+
+            #header img {
+                height: 60px;
+            }
+
+            .message {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .icon {
+                font-size: 18px;
+            }
+
+            #question {
+                font-size: 12px;
+            }
+
+            #send-button {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <img src="Images/CM.png" alt="Logo">
+        Official AI Assistant
+    </div>
+    <div id="chat-container">
+        <div id="chat-box">
+            <!-- Chat messages will be dynamically added here -->
+        </div>
+        <div id="input-container">
+            <input type="text" id="question" placeholder="Ask a question...">
+            <button id="send-button" onclick="sendQuestion()">Send</button>
+        </div>
+    </div>
+    <div id="footer">
+        &copy; 2024 Critical Manufacturing. All rights reserved.
+    </div>
+
+    <script>
+        let chatHistory = [];
+        let isFetching = false;
+
+        function displayChatHistory() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+
+            chatHistory.forEach(entry => {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message ' + entry.role;
+
+                // Add an icon depending on the role (user or ai)
+                const iconElement = document.createElement('div');
+                iconElement.className = 'icon';
+                iconElement.innerHTML = entry.role === 'user' ? '👤' : '🤖';
+                messageElement.appendChild(iconElement);
+
+                // Add the main content
+                const contentElement = document.createElement('div');
+                contentElement.className = 'message-content';
+                contentElement.innerHTML = entry.content;
+                messageElement.appendChild(contentElement);
+
+                chatBox.appendChild(messageElement);
+            });
+
+            // Scroll to the bottom after adding new messages
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendQuestion() {
+            const questionInput = document.getElementById('question');
+            const question = questionInput.value.trim();
+
+            if (!question || isFetching) return;
+
+            // Add user's message to chat history
+            chatHistory.push({ role: 'user', content: question });
+            displayChatHistory();
+
+            questionInput.value = '';
+            const chatBox = document.getElementById('chat-box');
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message loading';
+            loadingMessage.innerHTML = 'Loading...';
+            chatBox.appendChild(loadingMessage);
+
+            // Scroll to the bottom when loading
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            isFetching = true;
+
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    question: question,
+                    chat_history: chatHistory
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatBox.removeChild(loadingMessage);
+
+                if (data.error) {
+                    console.error('Error occurred:', data.error);
+                    chatHistory.push({ role: 'ai', content: 'An error occurred. Please try again later.' });
+                } else {
+                    chatHistory.push({ role: 'ai', content: formatResponse(data.answer) });
+                }
+                isFetching = false;
+                displayChatHistory();
+            })
+            .catch(error => {
+                console.error('Error occurred:', error);
+                chatHistory.push({ role: 'ai', content: 'An error occurred. Please try again later.' });
+                isFetching = false;
+                displayChatHistory();
+            });
+        }
+
+        function formatResponse(response) {
+            let formattedResponse = response
+                .replace(/`([^`]*)`/g, '<code>$1</code>') // Convert inline code
+                .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>') // Convert code blocks
+                .replace(/\n/g, '<br>'); // Convert new lines to <br>
+
+            // Convert ordered lists
+            formattedResponse = formattedResponse.replace(/<ol>([\s\S]*?)<\/ol>/g, function(match, content) {
+                return '<ol>' + content.replace(/<li>(.*?)<\/li>/g, '<li>$1</li>') + '</ol>';
+            });
+
+            return formattedResponse;
+        }
+
+        // Add event listener for ENTER key press
+        document.getElementById('question').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the default action (newline in the input field)
+                sendQuestion(); // Trigger the sendQuestion function
+            }
+        });
+
+        // Add welcome message to chat history when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            chatHistory.push({ role: 'ai', content: 'Welcome to the chat! I am the official AI of Critical Manufacturing MES, I can help you with any information you need related to the Developer Portal of Critical Manufacturing MES. How can I assist you today?' });
+            displayChatHistory();
+        });
+    </script>
+</body>
+</html>
